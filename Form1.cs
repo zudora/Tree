@@ -23,41 +23,117 @@ namespace Tree
             // Go six deep.
             Dictionary<int, Node> nodeHash= new Dictionary<int,Node>();
             int nodeCount = 0;
+            int level = 0;
             Node root = new Node(nodeCount, "");
             Node parent = root;
             nodeHash.Add(root.nodeId, root);
 
-            //Steps for adding. This adds left and right children.
-            nodeCount++;
-            Node newA = new Node(nodeCount,"A");
-            parent.childAdd(nodeCount, 0);
-            nodeHash.Add(newA.nodeId, newA);
-            nodeCount++; 
-            Node newB = new Node(nodeCount, "B");
-            parent.childAdd(nodeCount, 1);
-            nodeHash.Add(newB.nodeId, newB);
+            branch(parent, level, ref nodeCount, nodeHash);
+            List<string> permList = new List<string>(); 
 
-            // Keep track of iteration level when going bown a branch and compare to desired depth.
-            // At root, iteration level is 0.
-            // Then add A. Increment level to 1.
-            // Then add left child (A), producing sequence root-A-A. Increment level.
-            // Continue until level equals desired depth (note that root adds a symbol)
-            // Roll up one level and add right branch.
-            // Roll up TWO levels and add left and right branches, with roll-ups.
-            // How to identify when to roll up and by how much?
-            //  If level == depth and branch == left (i.e. text == "A"), roll up 1 and add right branch
-            //  If level == depth and branch == right (i.e. text == "B"), roll up 2 and add right branch, but then add left and right as usual
+            foreach (int key in nodeHash.Keys)
+            {
+                string aggText = nodeHash[key].nodeText;
+                Debug.WriteLine(aggText);
+                if (!string.IsNullOrEmpty(aggText))
+                { 
+                    if (aggText.Length == 6)
+                    {
+                        permList.Add(aggText);
+                    }
+                }
+            }
 
-            //For root, just create it
-            //Then call add on root
-            //That increments and checks the level
-            // If it's less than or equal to the depth, create a left branch.
-            // If it's greater than the depth, decrement it by two and add the right branch to the parent of the last node. (Keep track or just look up?)
-            //
-            // Call add on the new node
+            List<string> doubleList = new List<String>();
+            List<string> ringList = new List<String>();
+            List<string> dupes = new List<String>();
 
+            foreach (string perm in permList)
+            {
+                int flag = -1;
+                foreach (string doub in doubleList)
+                {                   
+                    if (doub.IndexOf(perm) > -1)
+                    {
+                        //found a dupe. Add Perm value to dupes and break
+                        dupes.Add(perm);
+                        flag = 1;
+                        break;
+                    }
+                }
+                if (flag == -1)
+                {
+                    doubleList.Add(perm + perm);
+                }
+            }
+            
+            //Debug.WriteLine("Before"); 
+            foreach (string item in permList)
+            {
+              //  Debug.Write(item + " ");
+            }
+
+            //dedupe
+            foreach (string dupeItem in dupes)
+            {
+                permList.Remove(dupeItem);
+            }
+            //Debug.WriteLine("\n");
+            //Debug.WriteLine("After");
+            foreach (string item in permList)
+            {
+                //Debug.Write(item + " ");
+            }
         }
         
+        public static void branch(Node parent, int level, ref int nodeCount, Dictionary<int, Node> nodeHash)
+        {
+            if (level <= 5)
+            {
+                level++;
+
+                for (int i = 0; i < 2; i++)
+                {                                                
+                    nodeCount++;
+                    string newText;
+                    int branchNo;
+                    if (i == 0)
+                    {
+                        newText = parent.nodeText + "A";
+                        branchNo = 0;
+                    }
+                    else if (i == 1)
+                    {
+                        newText = parent.nodeText + "B";
+                        branchNo = 1;
+                    }
+                    else
+                    {
+                        newText = "";
+                        branchNo = -1;
+                    }
+
+                    Node newChild = new Node(nodeCount, newText);
+                    parent.childAdd(nodeCount, branchNo);
+                    nodeHash.Add(newChild.nodeId, newChild);
+
+                    //call branch on left branch
+                    branch(newChild, level, ref nodeCount, nodeHash);
+
+                }
+                    
+
+                ////add right branch
+                //nodeCount++;
+                //Node newB = new Node(nodeCount, parent.nodeText + "B");
+                //parent.childAdd(nodeCount, 1);
+                //nodeHash.Add(newB.nodeId, newB);
+
+                ////call branch on left branch
+                //branch(newB, level, ref nodeCount, nodeHash);
+            }
+        }
+
         public static void placeNode(string inText)
         {
             // a tree is a collection of nodes with IDs
