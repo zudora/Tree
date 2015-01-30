@@ -12,13 +12,14 @@ namespace SymbolTree
         static void Main(string[] args)
         {
             Dictionary<string, int> valFreq = buildDic();
-            List<treeNode> nodes1 = nodes1 = treeBuild(valFreq);
+            List<treeNode> nodes1 = nodes1 = listBuild(valFreq);
+            treeBuild(nodes1);
 
-            Dictionary<string, int> valFreq2 = buildDic2();
-            List<treeNode> nodes2 = treeBuild(valFreq2);
+            //Dictionary<string, int> valFreq2 = buildDic2();
+            //List<treeNode> nodes2 = listBuild(valFreq2);
         }
 
-        public static List<treeNode> treeBuild(Dictionary<string, int> valFreq)
+        public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
         {
             List<treeNode> workList = new List<treeNode>();
             int nodeCount = 0;
@@ -30,9 +31,56 @@ namespace SymbolTree
 
                 //check freq value and insert                
                 int freq = entry.Value;
-                int pos = 0;
+                int pos = nodeInsert(freq, entry.Key, workList);
 
-                while (pos < workList.Count && freq < workList[pos].freq)
+                workList.Insert(pos, newNode);
+                nodeCount++;
+            }
+            
+            //foreach (treeNode item in workList)
+            //{
+            //    Debug.WriteLine(item.value + ": " + item.freq);
+            //}
+
+            return workList;
+        }
+
+        public static void treeBuild(List<treeNode> workList)
+        {
+            int nodeCount = workList.Count;
+
+            while (workList.Count > 1)
+            {
+                treeNode ult = workList[workList.Count - 1];
+                treeNode penult = workList[workList.Count - 2];
+                int sumFreq = ult.freq + penult.freq;
+                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null);
+                
+                //how does a null sort
+                int pos = nodeInsert(newNode.freq, newNode.value, workList);
+
+                workList.Insert(pos, newNode);
+                workList.Remove(workList[workList.Count - 1]);
+                workList.Remove(workList[workList.Count - 1]);
+
+                Debug.WriteLine("New round");
+                foreach (treeNode node in workList)
+                {
+                    Debug.WriteLine(node.value + ": " + node.freq);
+
+                }
+
+                nodeCount++;
+            }
+            
+        }
+
+        public static int nodeInsert(int freq, string valString, List<treeNode> workList)
+        {
+           
+            int pos = 0;
+
+            while (pos < workList.Count && freq < workList[pos].freq)
                 {
 
                     pos++;
@@ -42,7 +90,7 @@ namespace SymbolTree
                 if (workList.Count > 0 && pos < workList.Count && freq == workList[pos].freq)
                 {
                     //freq values are the same. Sort by value.
-                    while (pos < workList.Count && freq == workList[pos].freq && string.Compare(entry.Key, workList[pos].value) == 1)
+                    while (pos < workList.Count && freq == workList[pos].freq && string.Compare(valString, workList[pos].value) == 1)
                     {
 
                         pos++;
@@ -50,35 +98,26 @@ namespace SymbolTree
                     }
 
                 }
-                workList.Insert(pos, newNode);
-                nodeCount++;
-            }
-
-            foreach (treeNode item in workList)
-            {
-                Debug.WriteLine(item.value + ": " + item.freq);
-
-            }
-
-            return workList;
+                return pos;                
         }
-
         static Dictionary<string, int> buildDic()
         {
+            //Dummy function
             //using a string here
             Dictionary<string, int> valFreq = new Dictionary<string, int>();
 
+
             valFreq.Add("D", 12);
             valFreq.Add("B", 14);
-            valFreq.Add("I", 1);
+            valFreq.Add("K", 1);
             valFreq.Add("C", 12);
-            valFreq.Add("E", 9);
-            valFreq.Add("R", 12);
-            valFreq.Add("F", 6);
-            valFreq.Add("G", 4);
-            valFreq.Add("M", 12);
-            valFreq.Add("H", 3);
+            valFreq.Add("G", 9);
+            valFreq.Add("H", 6);
+            valFreq.Add("I", 4);
+            valFreq.Add("F", 12);
+            valFreq.Add("J", 3);
             valFreq.Add("A", 20);
+            valFreq.Add("E", 12);
 
             return valFreq;
         }
@@ -88,18 +127,19 @@ namespace SymbolTree
             //using a string here
             Dictionary<string, int> valFreq2 = new Dictionary<string, int>();
 
-            valFreq2.Add("R", 12);
-            valFreq2.Add("B", 14);
-            valFreq2.Add("I", 1);
-            valFreq2.Add("C", 12);
-            valFreq2.Add("E", 9);       
-            valFreq2.Add("F", 6);
-            valFreq2.Add("G", 4);
-            valFreq2.Add("M", 12);
-            valFreq2.Add("H", 3);
-            valFreq2.Add("A", 20);
             valFreq2.Add("D", 12);
+            valFreq2.Add("B", 14);
+            valFreq2.Add("K", 1);
+            valFreq2.Add("C", 12);
+            valFreq2.Add("G", 9);       
+            valFreq2.Add("H", 6);
+            valFreq2.Add("I", 4);
+            valFreq2.Add("F", 12);
+            valFreq2.Add("J", 3);
+            valFreq2.Add("A", 20);
+            valFreq2.Add("E", 12);
 
+    
             return valFreq2;
         }
         
@@ -111,9 +151,9 @@ namespace SymbolTree
             public int freq;
             public string value;
                      
-            public treeNode(int lChild, int rChild, int nodeCount, int freq, string value)
+            public treeNode(int lChild, int rChild, int id, int freq, string value)
             {
-                this.id = nodeCount++;
+                this.id = id;
                 this.lChild = lChild;
                 this.rChild = rChild;
                 this.freq = freq;
