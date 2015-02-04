@@ -15,6 +15,10 @@ namespace SymbolTree
             List<treeNode> nodes1 = nodes1 = listBuild(valFreq);
             treeBuild(nodes1);
 
+            // Have set of nodes with children. Now run through all nodes and assign symbols 
+            
+            
+
             //Dictionary<string, int> valFreq2 = buildDic2();
             //List<treeNode> nodes2 = listBuild(valFreq2);
         }
@@ -37,11 +41,6 @@ namespace SymbolTree
                 nodeCount++;
             }
             
-            //foreach (treeNode item in workList)
-            //{
-            //    Debug.WriteLine(item.value + ": " + item.freq);
-            //}
-
             return workList;
         }
 
@@ -100,12 +99,12 @@ namespace SymbolTree
                 }
                 return pos;                
         }
+
         static Dictionary<string, int> buildDic()
         {
             //Dummy function
             //using a string here
             Dictionary<string, int> valFreq = new Dictionary<string, int>();
-
 
             valFreq.Add("D", 12);
             valFreq.Add("B", 14);
@@ -124,7 +123,8 @@ namespace SymbolTree
 
         static Dictionary<string, int> buildDic2()
         {
-            //using a string here
+            // Same values and freqs as version 1
+            // Inserted in different order to make sure results are same
             Dictionary<string, int> valFreq2 = new Dictionary<string, int>();
 
             valFreq2.Add("D", 12);
@@ -142,6 +142,39 @@ namespace SymbolTree
     
             return valFreq2;
         }
+
+        static Dictionary<string, int> buildDic3()
+        {
+            //Same freq order but different freqs
+            
+            Dictionary<string, int> valFreq3 = new Dictionary<string, int>();
+
+            valFreq3.Add("A", 150);
+            valFreq3.Add("B", 15);
+            valFreq3.Add("C", 14);
+            valFreq3.Add("D", 13);
+            valFreq3.Add("E", 12);
+            valFreq3.Add("F", 11);            
+            valFreq3.Add("G", 9);
+            valFreq3.Add("H", 4);
+            valFreq3.Add("I", 3);            
+            valFreq3.Add("J", 3);
+            valFreq3.Add("K", 1);
+
+            //valFreq3.Add("A", 20);
+            //valFreq3.Add("B", 14);
+            //valFreq3.Add("C", 12);
+            //valFreq3.Add("D", 12);
+            //valFreq3.Add("E", 12);
+            //valFreq3.Add("F", 12);
+            //valFreq3.Add("G", 9);
+            //valFreq3.Add("H", 6);
+            //valFreq3.Add("I", 4);
+            //valFreq3.Add("J", 3);
+            //valFreq3.Add("K", 1);
+
+            return valFreq3;
+        }        
         
         public struct treeNode
         {
@@ -160,10 +193,6 @@ namespace SymbolTree
                 this.value = value;
 
             }
-
-
-
-        }
-    
+        }    
     }
 }
