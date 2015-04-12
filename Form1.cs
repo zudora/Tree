@@ -119,18 +119,7 @@ namespace Tree
 
                     //call branch on left branch
                     branch(newChild, level, ref nodeCount, nodeHash);
-
-                }
-                    
-
-                ////add right branch
-                //nodeCount++;
-                //Node newB = new Node(nodeCount, parent.nodeText + "B");
-                //parent.childAdd(nodeCount, 1);
-                //nodeHash.Add(newB.nodeId, newB);
-
-                ////call branch on left branch
-                //branch(newB, level, ref nodeCount, nodeHash);
+                }                
             }
         }
 

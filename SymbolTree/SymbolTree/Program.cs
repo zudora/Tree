@@ -12,11 +12,11 @@ namespace SymbolTree
         static void Main(string[] args)
         {
             Dictionary<string, int> valFreq = buildDic();
-            List<treeNode> nodes1 = nodes1 = listBuild(valFreq);
-            treeBuild(nodes1);
-
-            //Dictionary<string, int> valFreq2 = buildDic2();
-            //List<treeNode> nodes2 = listBuild(valFreq2);
+            List<treeNode> nodes1 = nodes1 = listBuild(valFreq);            
+            List<treeNode> treeList = new List<treeNode>();
+            treeNode root = new treeNode();
+            Dictionary<int, treeNode> treeDic = treeBuild(nodes1, out root);
+            treeAssign(root, 0, treeDic, null);
         }
 
         public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
@@ -27,7 +27,7 @@ namespace SymbolTree
             foreach (KeyValuePair<string, int> entry in valFreq)
             {
                 //create new treeNode
-                treeNode newNode = new treeNode(-1, -1, nodeCount, entry.Value, entry.Key);
+                treeNode newNode = new treeNode(-1, -1, nodeCount, entry.Value, entry.Key, null);
 
                 //check freq value and insert                
                 int freq = entry.Value;
@@ -36,26 +36,25 @@ namespace SymbolTree
                 workList.Insert(pos, newNode);
                 nodeCount++;
             }
-            
-            //foreach (treeNode item in workList)
-            //{
-            //    Debug.WriteLine(item.value + ": " + item.freq);
-            //}
 
             return workList;
         }
 
-        public static void treeBuild(List<treeNode> workList)
+        public static Dictionary<int, treeNode> treeBuild(List<treeNode> workList, out treeNode root)
         {
             int nodeCount = workList.Count;
+            Dictionary<int, treeNode> treeDic = new Dictionary<int, treeNode>();
 
             while (workList.Count > 1)
             {
                 treeNode ult = workList[workList.Count - 1];
                 treeNode penult = workList[workList.Count - 2];
                 int sumFreq = ult.freq + penult.freq;
-                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null);
+                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null, null);                
+                treeDic.Add(ult.id, ult);
+                treeDic.Add(penult.id, penult);
                 
+
                 //how does a null sort
                 int pos = nodeInsert(newNode.freq, newNode.value, workList);
 
@@ -63,49 +62,103 @@ namespace SymbolTree
                 workList.Remove(workList[workList.Count - 1]);
                 workList.Remove(workList[workList.Count - 1]);
 
-                Debug.WriteLine("New round");
+                //Debug.WriteLine("New round");write
                 foreach (treeNode node in workList)
                 {
-                    Debug.WriteLine(node.value + ": " + node.freq);
-
+                    //Debug.WriteLine(node.value + ": " + node.freq);
                 }
-
                 nodeCount++;
             }
+
+            Debug.Assert(workList.Count == 1);
+
+            root = workList[0];
+            treeDic.Add(root.id, root);
+            Debug.WriteLine(treeDic.Count);
+            foreach (KeyValuePair<int, treeNode> kvp in treeDic)
+            {
+                Debug.WriteLine(kvp.Key, kvp.Value.value);
+            }
+            return treeDic;
+        }
+
+        public static void treeAssign(treeNode parent, int level, Dictionary<int, treeNode> treeDic, string encString)
+        {
+            // Only assign symbols to leaf nodes
+            // Add one symbol length for each level
+
+            // For each node, get the children. If a leaf, assign a symbol and stop. Otherwise, call treeAssign on child
+            // Node level tracked by level variable
             
+            Dictionary<int, string> SymbolDict = new Dictionary<int, string>();
+            for (int nodeNum = 0; nodeNum <= treeDic.Count; nodeNum++)
+            {
+                for (int dir = 0; dir <= 1; dir++)
+                {
+                    int childId;
+
+                    if (dir == 0)
+                    {
+                        //left side                    
+                        childId = parent.lChild;
+                    }
+
+                    else
+                    {
+                        //right side
+                        childId = parent.rChild;
+                    }
+
+                    treeNode childNode = new treeNode();
+                    if (treeDic.TryGetValue(childId, out childNode))
+                    {
+                        childNode.encoding = encString + dir;
+                        SymbolDict.Add(childNode.id, childNode.encoding);
+                        treeAssign(childNode, level, treeDic, childNode.encoding);
+                    }
+                    else
+                    {
+                        //it's a leaf
+                        Debug.WriteLine("Node not found");
+                    }
+                    //reassign next parent
+                    //if (childNode.lChild != null && childNode.rChild != null)
+                    //{
+                        
+                    //}
+                    level++;
+                }
+            }
+            foreach (KeyValuePair<int, string> kvp in SymbolDict)
+            {
+                Debug.WriteLine(kvp.Key + ": " + kvp.Value);
+            }
         }
 
         public static int nodeInsert(int freq, string valString, List<treeNode> workList)
         {
-           
             int pos = 0;
 
             while (pos < workList.Count && freq < workList[pos].freq)
-                {
+            {
+                pos++;
+            }
 
+            if (workList.Count > 0 && pos < workList.Count && freq == workList[pos].freq)
+            {
+                //freq values are the same. Sort by value.
+                while (pos < workList.Count && freq == workList[pos].freq && string.Compare(valString, workList[pos].value) == 1)
+                {
                     pos++;
-
                 }
-
-                if (workList.Count > 0 && pos < workList.Count && freq == workList[pos].freq)
-                {
-                    //freq values are the same. Sort by value.
-                    while (pos < workList.Count && freq == workList[pos].freq && string.Compare(valString, workList[pos].value) == 1)
-                    {
-
-                        pos++;
-
-                    }
-
-                }
-                return pos;                
+            }
+            return pos;
         }
         static Dictionary<string, int> buildDic()
         {
             //Dummy function
             //using a string here
             Dictionary<string, int> valFreq = new Dictionary<string, int>();
-
 
             valFreq.Add("D", 12);
             valFreq.Add("B", 14);
@@ -131,7 +184,7 @@ namespace SymbolTree
             valFreq2.Add("B", 14);
             valFreq2.Add("K", 1);
             valFreq2.Add("C", 12);
-            valFreq2.Add("G", 9);       
+            valFreq2.Add("G", 9);
             valFreq2.Add("H", 6);
             valFreq2.Add("I", 4);
             valFreq2.Add("F", 12);
@@ -139,10 +192,9 @@ namespace SymbolTree
             valFreq2.Add("A", 20);
             valFreq2.Add("E", 12);
 
-    
             return valFreq2;
         }
-        
+
         public struct treeNode
         {
             public int id;
@@ -150,20 +202,18 @@ namespace SymbolTree
             public int rChild;
             public int freq;
             public string value;
-                     
-            public treeNode(int lChild, int rChild, int id, int freq, string value)
+            public string encoding;
+
+            public treeNode(int lChild, int rChild, int id, int freq, string value, string encoding)
             {
                 this.id = id;
                 this.lChild = lChild;
                 this.rChild = rChild;
                 this.freq = freq;
                 this.value = value;
+                this.encoding = encoding;
 
             }
-
-
-
         }
-    
     }
 }

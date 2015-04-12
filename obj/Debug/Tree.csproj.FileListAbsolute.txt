@@ -6,3 +6,6 @@ c:\users\betsy\documents\visual studio 2013\Projects\Tree\Tree\obj\Debug\Tree.Pr
 c:\users\betsy\documents\visual studio 2013\Projects\Tree\Tree\obj\Debug\Tree.csproj.GenerateResource.Cache
 c:\users\betsy\documents\visual studio 2013\Projects\Tree\Tree\obj\Debug\Tree.exe
 c:\users\betsy\documents\visual studio 2013\Projects\Tree\Tree\obj\Debug\Tree.pdb
+C:\Users\Betsy\Documents\GitHub\Tree\bin\Debug\Tree.exe.config
+C:\Users\Betsy\Documents\GitHub\Tree\obj\Debug\Tree.exe
+C:\Users\Betsy\Documents\GitHub\Tree\obj\Debug\Tree.pdb
