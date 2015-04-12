@@ -37,7 +37,6 @@ namespace SymbolTree
                 workList.Insert(pos, newNode);
                 nodeCount++;
             }
-
             return workList;
         }
 
@@ -162,6 +161,7 @@ namespace SymbolTree
             }
             return pos;
         }
+
         static Dictionary<string, int> buildDic()
         {
             //Dummy function
@@ -185,7 +185,8 @@ namespace SymbolTree
 
         static Dictionary<string, int> buildDic2()
         {
-            //using a string here
+            // Same values and freqs as version 1
+            // Inserted in different order to make sure results are same
             Dictionary<string, int> valFreq2 = new Dictionary<string, int>();
 
             valFreq2.Add("D", 12);
@@ -222,6 +223,6 @@ namespace SymbolTree
                 this.encoding = encoding;
 
             }
-        }
+        }    
     }
 }
