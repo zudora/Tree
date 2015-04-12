@@ -15,8 +15,9 @@ namespace SymbolTree
             List<treeNode> nodes1 = nodes1 = listBuild(valFreq);            
             List<treeNode> treeList = new List<treeNode>();
             treeNode root = new treeNode();
-            Dictionary<int, treeNode> treeDic = treeBuild(nodes1, out root);
-            treeAssign(root, 0, treeDic, null);
+            Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
+            Dictionary<int, string> SymbolDict = new Dictionary<int, string>();
+            treeAssign(root, 0, TreeDict, SymbolDict, null);
         }
 
         public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
@@ -82,7 +83,7 @@ namespace SymbolTree
             return treeDic;
         }
 
-        public static void treeAssign(treeNode parent, int level, Dictionary<int, treeNode> treeDic, string encString)
+        public static void treeAssign(treeNode parent, int level, Dictionary<int, treeNode> TreeDict, Dictionary<int, string> SymbolDict, string encString)
         {
             // Only assign symbols to leaf nodes
             // Add one symbol length for each level
@@ -90,8 +91,7 @@ namespace SymbolTree
             // For each node, get the children. If a leaf, assign a symbol and stop. Otherwise, call treeAssign on child
             // Node level tracked by level variable
             
-            Dictionary<int, string> SymbolDict = new Dictionary<int, string>();
-            for (int nodeNum = 0; nodeNum <= treeDic.Count; nodeNum++)
+            while (level >= 0)
             {
                 for (int dir = 0; dir <= 1; dir++)
                 {
@@ -109,30 +109,38 @@ namespace SymbolTree
                         childId = parent.rChild;
                     }
 
+                    Debug.WriteLine("dir: " + dir);
+                    Debug.WriteLine("childId: " + childId);
+                    Debug.WriteLine("level: " + level);
+
                     treeNode childNode = new treeNode();
-                    if (treeDic.TryGetValue(childId, out childNode))
+                    if (TreeDict.TryGetValue(childId, out childNode))
                     {
+                        level++;
                         childNode.encoding = encString + dir;
                         SymbolDict.Add(childNode.id, childNode.encoding);
-                        treeAssign(childNode, level, treeDic, childNode.encoding);
+                        if (level >= 0)
+                        {
+                            treeAssign(childNode, level, TreeDict, SymbolDict, childNode.encoding);
+                        }
                     }
                     else
                     {
-                        //it's a leaf
+                        //it's a leaf. If on the right side, go back up.
                         Debug.WriteLine("Node not found");
+                        level--;
+                        if (level < 0)
+                        {
+                            break;
+                        }
                     }
-                    //reassign next parent
-                    //if (childNode.lChild != null && childNode.rChild != null)
-                    //{
-                        
-                    //}
-                    level++;
                 }
             }
             foreach (KeyValuePair<int, string> kvp in SymbolDict)
             {
                 Debug.WriteLine(kvp.Key + ": " + kvp.Value);
             }
+            Debug.WriteLine ("done");
         }
 
         public static int nodeInsert(int freq, string valString, List<treeNode> workList)
