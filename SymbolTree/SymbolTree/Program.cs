@@ -4,50 +4,32 @@ using System.Diagnostics;
 
 namespace SymbolTree
 {
-    class Program
+    public struct treeNode
+    {
+        public int id;
+        public int lChild;
+        public int rChild;
+        public int freq;
+        public string value;
+        public string encoding;
+
+        public treeNode(int lChild, int rChild, int id, int freq, string value, string encoding)
+        {
+            this.id = id;
+            this.lChild = lChild;
+            this.rChild = rChild;
+            this.freq = freq;
+            this.value = value;
+            this.encoding = encoding;
+        }
+    }
+        public class Program
     {
         static void Main(string[] args)
         {
             // Build the starter dictionary of values and frequencies. This is dummy input for now.
             Dictionary<string, int> valFreq = buildDic();
-
-            // Order value/freq pairs and use to build tree
-            List<treeNode> nodes1 = listBuild(valFreq);            
-            List<treeNode> treeList = new List<treeNode>();
-            treeNode root = new treeNode();
-            Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
-            
-            Dictionary<int, string> SymbolDict = new Dictionary<int, string>();
-            foreach (KeyValuePair<int, treeNode> kvp in TreeDict)
-            {
-                //Debug.WriteLine("Key: " + kvp.Key + ", Value: " + kvp.Value.value);
-                treeNode node = new treeNode();
-                if (TreeDict.TryGetValue(kvp.Key, out node))
-                {
-                    string valString;
-                    if (node.value == null)
-                    {
-                        valString = "null";
-                    }
-                    else
-                    {
-                        valString = node.value;
-                    }
-                    //Debug.WriteLine("ID: " + node.id + " val: " + valString + " L: " + node.lChild + " R: " + node.rChild);
-                }
-            }
-            
-            treeAssign(root, 0, TreeDict, SymbolDict, null);
-            //foreach (KeyValuePair<int, string> entry in SymbolDict)
-            //{
-            //    Debug.WriteLine(entry.Key + ": " + entry.Value);
-            //}
-
-            //Dump tree
-            nodeDump(root, TreeDict, 0, SymbolDict);
-
-            //test for prefixes
-
+            Dictionary<int, string> SymbolDict = SymbolBuild(valFreq);
         }
 
         public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
@@ -67,7 +49,6 @@ namespace SymbolTree
                 workList.Insert(pos, newNode);
                 nodeCount++;
             }
-
             return workList;
         }
 
@@ -115,40 +96,41 @@ namespace SymbolTree
             }
         }
 
-        public static Dictionary<int, treeNode> treeBuild(List<treeNode> workList, out treeNode root)
+        public static Dictionary<int, string> SymbolBuild(Dictionary<string, int> inNodes)
         {
-            int nodeCount = workList.Count;
-            Dictionary<int, treeNode> treeDic = new Dictionary<int, treeNode>();
+            // Order value/freq pairs and use to build tree
+            List<treeNode> nodes1 = listBuild(inNodes);
+            List<treeNode> treeList = new List<treeNode>();
+            treeNode root = new treeNode();
+            Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
 
-            while (workList.Count > 1)
+            Dictionary<int, string> SymbolBuild = new Dictionary<int, string>();
+            foreach (KeyValuePair<int, treeNode> kvp in TreeDict)
             {
-                treeNode ult = workList[workList.Count - 1];
-                treeNode penult = workList[workList.Count - 2];
-                int sumFreq = ult.freq + penult.freq;
-                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null, null);                
-                treeDic.Add(ult.id, ult);
-                treeDic.Add(penult.id, penult);                
-
-                //how does a null sort
-                int pos = nodeInsert(newNode.freq, newNode.value, workList);
-
-                workList.Insert(pos, newNode);
-                workList.Remove(workList[workList.Count - 1]);
-                workList.Remove(workList[workList.Count - 1]);                
-                nodeCount++;
+                //Debug.WriteLine("Key: " + kvp.Key + ", Value: " + kvp.Value.value);
+                treeNode node = new treeNode();
+                if (TreeDict.TryGetValue(kvp.Key, out node))
+                {
+                    string valString;
+                    if (node.value == null)
+                    {
+                        valString = "null";
+                    }
+                    else
+                    {
+                        valString = node.value;
+                    }
+                    //Debug.WriteLine("ID: " + node.id + " val: " + valString + " L: " + node.lChild + " R: " + node.rChild);
+                }
             }
-
-            Debug.Assert(workList.Count == 1);
-
-            root = workList[0];
-            treeDic.Add(root.id, root);            
-            foreach (KeyValuePair<int, treeNode> kvp in treeDic)
-            {
-                //Debug.WriteLine(kvp.Key, kvp.Value.value);
-            }
-            return treeDic;
+            treeAssign(root, 0, TreeDict, SymbolBuild, null);
+             
+            //Dump tree
+            nodeDump(root, TreeDict, 0, SymbolBuild);
+            
+            return SymbolBuild;
         }
-
+        
         public static void treeAssign(treeNode parent, int level, Dictionary<int, treeNode> TreeDict, Dictionary<int, string> SymbolDict, string encString)
         {
             if (level == 0)
@@ -186,6 +168,54 @@ namespace SymbolTree
             }
         }
 
+        public static Dictionary<int, string> nodesWithValues(Dictionary<int, string> AssignedSymbols, Dictionary<int, treeNode> inTree)
+        {
+            Dictionary<int, string> nodesWithValues = new Dictionary<int, string>();
+
+            foreach (KeyValuePair<int, string> kvp in AssignedSymbols)
+            {
+                if (inTree[kvp.Key].value != null)
+                {
+                    nodesWithValues.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return nodesWithValues;
+        }
+
+        public static Dictionary<int, treeNode> treeBuild(List<treeNode> workList, out treeNode root)
+        {
+            int nodeCount = workList.Count;
+            Dictionary<int, treeNode> treeDic = new Dictionary<int, treeNode>();
+
+            while (workList.Count > 1)
+            {
+                treeNode ult = workList[workList.Count - 1];
+                treeNode penult = workList[workList.Count - 2];
+                int sumFreq = ult.freq + penult.freq;
+                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null, null);
+                treeDic.Add(ult.id, ult);
+                treeDic.Add(penult.id, penult);
+
+                //how does a null sort
+                int pos = nodeInsert(newNode.freq, newNode.value, workList);
+
+                workList.Insert(pos, newNode);
+                workList.Remove(workList[workList.Count - 1]);
+                workList.Remove(workList[workList.Count - 1]);
+                nodeCount++;
+            }
+
+            Debug.Assert(workList.Count == 1);
+
+            root = workList[0];
+            treeDic.Add(root.id, root);
+            foreach (KeyValuePair<int, treeNode> kvp in treeDic)
+            {
+                //Debug.WriteLine(kvp.Key, kvp.Value.value);
+            }
+            return treeDic;
+        }
 
         public static int nodeInsert(int freq, string valString, List<treeNode> workList)
         {
@@ -247,26 +277,6 @@ namespace SymbolTree
             valFreq2.Add("E", 12);
 
             return valFreq2;
-        }
-
-        public struct treeNode
-        {
-            public int id;
-            public int lChild;
-            public int rChild;
-            public int freq;
-            public string value;
-            public string encoding;
-
-            public treeNode(int lChild, int rChild, int id, int freq, string value, string encoding)
-            {
-                this.id = id;
-                this.lChild = lChild;
-                this.rChild = rChild;
-                this.freq = freq;
-                this.value = value;
-                this.encoding = encoding;
-            }
-        }    
+        }       
     }
 }
