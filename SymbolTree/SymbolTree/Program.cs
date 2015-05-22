@@ -29,8 +29,23 @@ namespace SymbolTree
         {
             // Build the starter dictionary of values and frequencies. This is dummy input for now.
             Dictionary<string, int> valFreq = buildDic();
-            Dictionary<int, string> SymbolDict = SymbolBuild(valFreq);
+            
+            // Order value/freq pairs and use to build tree
+            List<treeNode> nodes1 = listBuild(valFreq);
+            List<treeNode> treeList = new List<treeNode>();
+            treeNode root = new treeNode();
+            Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
+
+            Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
         }
+
+        static Dictionary<string, int> freqDict(float[,] inputData)
+        {
+            Dictionary<string, int> builtFreq = new Dictionary<string, int>();
+            return builtFreq;
+        }
+
+       
 
         public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
         {
@@ -96,14 +111,8 @@ namespace SymbolTree
             }
         }
 
-        public static Dictionary<int, string> SymbolBuild(Dictionary<string, int> inNodes)
-        {
-            // Order value/freq pairs and use to build tree
-            List<treeNode> nodes1 = listBuild(inNodes);
-            List<treeNode> treeList = new List<treeNode>();
-            treeNode root = new treeNode();
-            Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
-
+        public static Dictionary<int, string> SymbolBuild(Dictionary<int, treeNode> TreeDict, treeNode root)
+        {            
             Dictionary<int, string> SymbolBuild = new Dictionary<int, string>();
             foreach (KeyValuePair<int, treeNode> kvp in TreeDict)
             {
