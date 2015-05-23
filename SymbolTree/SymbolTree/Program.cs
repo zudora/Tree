@@ -45,16 +45,23 @@ namespace SymbolTree
 
         public static void imageInput()
         {
-            string imageFilePath = "C:\\Users\\Betsy\\Pictures\\Convolution.PNG";
+            string imageFilePath = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
             Bitmap loadImage = new Bitmap(imageFilePath);
-            Debug.WriteLine(loadImage.Height * loadImage.Width);            
+
+            int[,] redChannel = new int[loadImage.Height, loadImage.Width];
+            int[,] greenChannel = new int[loadImage.Height, loadImage.Width];
+            int[,] blueChannel = new int[loadImage.Height, loadImage.Width];
+
             for (int i = 0; i < loadImage.Width; i++)
             {
                 for (int j = 0; j < loadImage.Height; j++)
                 {
-                    Color pixColor = loadImage.GetPixel(i, j);                    
-                    int gray = (pixColor.R + pixColor.B + pixColor.G)/3;
-                    Debug.WriteLine(pixColor.R + ", " + gray);
+                    Color pixColor = loadImage.GetPixel(i, j);                                        
+                    
+                    Debug.WriteLine(pixColor.R + ", " + pixColor.G + ", " + pixColor.B);
+                    redChannel[i, j] = pixColor.R;
+                    greenChannel[i, j] = pixColor.G;
+                    blueChannel[i, j] = pixColor.B;
                 }
             }
             
