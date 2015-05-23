@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
+using System.Drawing;
+using System.IO;
 using System.Diagnostics;
 
 namespace SymbolTree
@@ -37,10 +39,36 @@ namespace SymbolTree
             Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
 
             Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
+
+            imageInput();
         }
 
-        static Dictionary<string, int> freqDict(float[,] inputData)
+        public static void imageInput()
         {
+            string imageFilePath = "C:\\Users\\Betsy\\Pictures\\Convolution.PNG";
+            Bitmap loadImage = new Bitmap(imageFilePath);
+            Debug.WriteLine(loadImage.Height * loadImage.Width);            
+            for (int i = 0; i < loadImage.Width; i++)
+            {
+                for (int j = 0; j < loadImage.Height; j++)
+                {
+                    Color pixColor = loadImage.GetPixel(i, j);                    
+                    int gray = (pixColor.R + pixColor.B + pixColor.G)/3;
+                    Debug.WriteLine(pixColor.R + ", " + gray);
+                }
+            }
+            
+            byte[] fileBytes = File.ReadAllBytes(imageFilePath); 
+            Debug.WriteLine(fileBytes.Length);
+        }
+
+
+
+        public static Dictionary<string, int> freqDict(float[,] inputData)
+        {
+            
+
+
             Dictionary<string, int> builtFreq = new Dictionary<string, int>();
             return builtFreq;
         }
@@ -73,7 +101,7 @@ namespace SymbolTree
             if (depth == 0)
             {
                 symbol = SymbolDict[parent.id];
-                Debug.WriteLine(parent.id + "(" + parent.value + ") : " + symbol);
+                //Debug.WriteLine(parent.id + "(" + parent.value + ") : " + symbol);
             }
             depth++;
             treeNode child = new treeNode(-1, -1, -1, -1, null, null);
@@ -105,7 +133,7 @@ namespace SymbolTree
                 if (child.id != -1)
                 {
                     symbol = SymbolDict[child.id];
-                    Debug.WriteLine(child.id + "(" + child.value + ") : " + symbol);
+                    //Debug.WriteLine(child.id + "(" + child.value + ") : " + symbol);
                     nodeDump(child, TreeDict, depth, SymbolDict);
                 }
             }
