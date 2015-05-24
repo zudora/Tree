@@ -43,11 +43,11 @@ namespace TreeAssignTest
 
             //testBadPrefixes();
         }
-        
+
         //public void testBadPrefixes()
         //{
         //    //making sure prefixes are caught
-        //    Dictionary<int, string> testValues = new Dictionary<int,string>();
+        //    Dictionary<int, string> testValues = new Dictionary<int, string>();
 
         //    testValues.Add(0, "0000");
         //    testValues.Add(1, "00");
