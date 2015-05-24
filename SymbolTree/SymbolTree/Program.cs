@@ -12,10 +12,10 @@ namespace SymbolTree
         public int lChild;
         public int rChild;
         public int freq;
-        public string value;
+        public int value;
         public string encoding;
 
-        public treeNode(int lChild, int rChild, int id, int freq, string value, string encoding)
+        public treeNode(int lChild, int rChild, int id, int freq, int value, string encoding)
         {
             this.id = id;
             this.lChild = lChild;
@@ -25,25 +25,40 @@ namespace SymbolTree
             this.encoding = encoding;
         }
     }
-        public class Program
+
+    public class Program
     {
         static void Main(string[] args)
         {
             // Build the starter dictionary of values and frequencies. This is dummy input for now.
-            Dictionary<string, int> valFreq = buildDic();
+            //Dictionary<string, int> valFreq = buildDic();
             
+            string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
+            List<int[,]> imageChannels = imageData(imageFile);
+
+            imageSave(imageChannels);
+            Dictionary<int, int> redFreqCollapse = freqDict(imageChannels[0]);
+            foreach (KeyValuePair<int, int> kvp in redFreqCollapse)
+            {
+                Debug.WriteLine("Pixel value:" + kvp.Key + ", frequency:" + kvp.Value);
+            }
+
             // Order value/freq pairs and use to build tree
-            List<treeNode> nodes1 = listBuild(valFreq);
+            List<treeNode> nodes1 = listBuild(redFreqCollapse);
             List<treeNode> treeList = new List<treeNode>();
             treeNode root = new treeNode();
             Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
 
             Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
 
-            string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
-            List<int[,]> imageChannels = imageData(imageFile);
+            foreach(KeyValuePair<int, string> symbol in SymbolDict)
+            {                
+                int origVal = TreeDict[symbol.Key].value;
+                int matchRed = redFreqCollapse[origVal]; 
+                
+                Debug.WriteLine("Key: " + symbol.Key + " Symbol: " + symbol.Value + " Match: " + matchRed + " Orig: " + origVal);
 
-            imageSave(imageChannels);
+            }
         }
 
         public static List<int[,]> imageData(string imagePath)
@@ -101,23 +116,38 @@ namespace SymbolTree
             greenOutput.Save("C:\\Users\\Betsy\\Pictures\\greenCat.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
         }
 
-        public static Dictionary<string, int> freqDict(float[,] inputData)
+        public static Dictionary<int, int> freqDict(int[,] inputData)
         {
-            
+            Dictionary<int, int> builtFreq = new Dictionary<int, int>();
+            for (int x = 0; x < inputData.GetLength(0); x++)
+            {
+                for (int y = 0; y < inputData.GetLength(1); y++)
+                {
+                    int pix = inputData[x, y];
+                    int freq;
+                    
+                    if (builtFreq.TryGetValue(pix, out freq))
+                    {
+                        //increment
+                        builtFreq[pix]++;
+                    }
+                    else
+                    {
+                        //add new entry
+                        builtFreq.Add(pix, 1);
+                    }
+                }
+            }
 
-
-            Dictionary<string, int> builtFreq = new Dictionary<string, int>();
             return builtFreq;
         }
 
-       
-
-        public static List<treeNode> listBuild(Dictionary<string, int> valFreq)
+        public static List<treeNode> listBuild(Dictionary<int, int> valFreq)
         {
             List<treeNode> workList = new List<treeNode>();
             int nodeCount = 0;
 
-            foreach (KeyValuePair<string, int> entry in valFreq)
+            foreach (KeyValuePair<int, int> entry in valFreq)
             {
                 //create new treeNode
                 treeNode newNode = new treeNode(-1, -1, nodeCount, entry.Value, entry.Key, null);
@@ -141,7 +171,7 @@ namespace SymbolTree
                 //Debug.WriteLine(parent.id + "(" + parent.value + ") : " + symbol);
             }
             depth++;
-            treeNode child = new treeNode(-1, -1, -1, -1, null, null);
+            treeNode child = new treeNode(-1, -1, -1, -1, -1, null);
 
             for (int i = 0; i <= 1; i++)
             {
@@ -185,14 +215,14 @@ namespace SymbolTree
                 treeNode node = new treeNode();
                 if (TreeDict.TryGetValue(kvp.Key, out node))
                 {
-                    string valString;
-                    if (node.value == null)
+                    int valInt;
+                    if (node.value == -1)
                     {
-                        valString = "null";
+                        valInt = 0;
                     }
                     else
                     {
-                        valString = node.value;
+                        valInt = node.value;
                     }
                     //Debug.WriteLine("ID: " + node.id + " val: " + valString + " L: " + node.lChild + " R: " + node.rChild);
                 }
@@ -248,7 +278,7 @@ namespace SymbolTree
 
             foreach (KeyValuePair<int, string> kvp in AssignedSymbols)
             {
-                if (inTree[kvp.Key].value != null)
+                if (inTree[kvp.Key].value != -1)
                 {
                     nodesWithValues.Add(kvp.Key, kvp.Value);
                 }
@@ -267,7 +297,7 @@ namespace SymbolTree
                 treeNode ult = workList[workList.Count - 1];
                 treeNode penult = workList[workList.Count - 2];
                 int sumFreq = ult.freq + penult.freq;
-                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, null, null);
+                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, 0, null);
                 treeDic.Add(ult.id, ult);
                 treeDic.Add(penult.id, penult);
 
@@ -291,7 +321,7 @@ namespace SymbolTree
             return treeDic;
         }
 
-        public static int nodeInsert(int freq, string valString, List<treeNode> workList)
+        public static int nodeInsert(int freq, int valInt, List<treeNode> workList)
         {
             int pos = 0;
 
@@ -303,7 +333,7 @@ namespace SymbolTree
             if (workList.Count > 0 && pos < workList.Count && freq == workList[pos].freq)
             {
                 //freq values are the same. Sort by value.
-                while (pos < workList.Count && freq == workList[pos].freq && string.Compare(valString, workList[pos].value) == 1)
+                while (pos < workList.Count && freq == workList[pos].freq && (valInt==workList[pos].value))
                 {
                     pos++;
                 }

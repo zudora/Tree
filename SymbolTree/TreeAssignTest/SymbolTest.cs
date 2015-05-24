@@ -13,19 +13,19 @@ namespace TreeAssignTest
         public void TestMethod1()
         {
             //create input
-            Dictionary<string, int> valFreq = new Dictionary<string, int>();
+            Dictionary<int, int> valFreq = new Dictionary<int, int>();
 
-            valFreq.Add("D", 12);
-            valFreq.Add("B", 14);
-            valFreq.Add("K", 1);
-            valFreq.Add("C", 12);
-            valFreq.Add("G", 9);
-            valFreq.Add("H", 6);
-            valFreq.Add("I", 4);
-            valFreq.Add("F", 12);
-            valFreq.Add("J", 3);
-            valFreq.Add("A", 20);
-            valFreq.Add("E", 12);
+            valFreq.Add(35, 12);
+            valFreq.Add(45, 14);
+            valFreq.Add(45, 1);
+            valFreq.Add(15, 12);
+            valFreq.Add(12, 9);
+            valFreq.Add(13, 6);
+            valFreq.Add(3, 4);
+            valFreq.Add(200, 12);
+            valFreq.Add(122, 3);
+            valFreq.Add(86, 20);
+            valFreq.Add(42, 12);
 
             //submit input to tree builder
             // Order value/freq pairs and use to build tree         
