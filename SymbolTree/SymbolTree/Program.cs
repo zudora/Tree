@@ -31,7 +31,19 @@ namespace SymbolTree
         static void Main(string[] args)
         {
             // Build the starter dictionary of values and frequencies. This is dummy input for now.
-            //Dictionary<string, int> valFreq = buildDic();
+            Dictionary<int, int> valFreq = new Dictionary<int, int>();
+
+            valFreq.Add(35, 12);
+            valFreq.Add(45, 14);
+            valFreq.Add(42, 1);
+            valFreq.Add(15, 12);
+            valFreq.Add(12, 9);
+            valFreq.Add(13, 6);
+            valFreq.Add(3, 4);
+            valFreq.Add(200, 12);
+            valFreq.Add(122, 3);
+            valFreq.Add(86, 20);
+            valFreq.Add(41, 12);
             
             string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
             List<int[,]> imageChannels = imageData(imageFile);
@@ -44,21 +56,59 @@ namespace SymbolTree
             }
 
             // Order value/freq pairs and use to build tree
-            List<treeNode> nodes1 = listBuild(redFreqCollapse);
+            List<treeNode> nodes1 = listBuild(valFreq);
+
+            //right now, nodes get removed from nodes1 when the tree is built
+            List<treeNode> testNodes = new List<treeNode>();
+            foreach(treeNode node in nodes1)
+            {
+                testNodes.Add(node);
+            }
             List<treeNode> treeList = new List<treeNode>();
-            treeNode root = new treeNode();
+            treeNode root = new treeNode(-1, -1, -1, -1, -1, null);
             Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
 
             Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
 
-            foreach(KeyValuePair<int, string> symbol in SymbolDict)
-            {                
+            foreach (KeyValuePair<int, string> symbol in SymbolDict)
+            {
+                //origVal is the 0-255 value. matchRed is the frequency of that 0-255 value. 
                 int origVal = TreeDict[symbol.Key].value;
-                int matchRed = redFreqCollapse[origVal]; 
-                
-                Debug.WriteLine("Key: " + symbol.Key + " Symbol: " + symbol.Value + " Match: " + matchRed + " Orig: " + origVal);
+                //for non-leaf nodes, this is just the sum of child frequencies. Original value is in nodes lists 
+                int origFreq = TreeDict[symbol.Key].freq; 
+                 
+                //testNodes
+                foreach (treeNode matchNode in treeList)
+                {
+                    if (matchNode.id == symbol.Key)
+                    {
+
+                    }
+                    else 
+                    { 
+                    
+                    }
+                }
+
+                Debug.WriteLine("Key: " + symbol.Key + " Symbol: " + symbol.Value + " Freq: " + origFreq + " Value: " + origVal);
 
             }
+
+            //List<treeNode> nodes1 = listBuild(redFreqCollapse);
+            //List<treeNode> treeList = new List<treeNode>();
+            //treeNode root = new treeNode(-1, -1, -1, -1, -1, null);
+            //Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
+
+            //Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
+
+            //foreach(KeyValuePair<int, string> symbol in SymbolDict)
+            //{                
+            //    int origVal = TreeDict[symbol.Key].value;
+            //    int matchFreq = redFreqCollapse[origVal]; 
+
+            //    Debug.WriteLine("Key: " + symbol.Key + " Symbol: " + symbol.Value + " Match: " + matchFreq + " Orig: " + origVal);
+
+            //}
         }
 
         public static List<int[,]> imageData(string imagePath)
@@ -212,7 +262,7 @@ namespace SymbolTree
             foreach (KeyValuePair<int, treeNode> kvp in TreeDict)
             {
                 //Debug.WriteLine("Key: " + kvp.Key + ", Value: " + kvp.Value.value);
-                treeNode node = new treeNode();
+                treeNode node = new treeNode(-1, -1, -1, -1, -1, null);
                 if (TreeDict.TryGetValue(kvp.Key, out node))
                 {
                     int valInt;
@@ -257,8 +307,8 @@ namespace SymbolTree
                     //right side
                     childId = parent.rChild;
                 }
-                
-                treeNode childNode = new treeNode();
+
+                treeNode childNode = new treeNode(-1, -1, -1, -1, -1, null);
                 if (TreeDict.TryGetValue(childId, out childNode))
                 {                    
                     childNode.encoding = encString + dir;
@@ -297,7 +347,7 @@ namespace SymbolTree
                 treeNode ult = workList[workList.Count - 1];
                 treeNode penult = workList[workList.Count - 2];
                 int sumFreq = ult.freq + penult.freq;
-                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, 0, null);
+                treeNode newNode = new treeNode(penult.id, ult.id, nodeCount, sumFreq, -1, null);
                 treeDic.Add(ult.id, ult);
                 treeDic.Add(penult.id, penult);
 

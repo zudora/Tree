@@ -17,7 +17,7 @@ namespace TreeAssignTest
 
             valFreq.Add(35, 12);
             valFreq.Add(45, 14);
-            valFreq.Add(45, 1);
+            valFreq.Add(42, 1);
             valFreq.Add(15, 12);
             valFreq.Add(12, 9);
             valFreq.Add(13, 6);
@@ -25,7 +25,7 @@ namespace TreeAssignTest
             valFreq.Add(200, 12);
             valFreq.Add(122, 3);
             valFreq.Add(86, 20);
-            valFreq.Add(42, 12);
+            valFreq.Add(41, 12);
 
             //submit input to tree builder
             // Order value/freq pairs and use to build tree         
