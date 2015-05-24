@@ -40,36 +40,66 @@ namespace SymbolTree
 
             Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
 
-            imageInput();
+            string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
+            List<int[,]> imageChannels = imageData(imageFile);
+
+            imageSave(imageChannels);
         }
 
-        public static void imageInput()
+        public static List<int[,]> imageData(string imagePath)
         {
-            string imageFilePath = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
-            Bitmap loadImage = new Bitmap(imageFilePath);
+            Bitmap loadImage = new Bitmap(imagePath);
 
-            int[,] redChannel = new int[loadImage.Height, loadImage.Width];
-            int[,] greenChannel = new int[loadImage.Height, loadImage.Width];
-            int[,] blueChannel = new int[loadImage.Height, loadImage.Width];
+            Debug.WriteLine(loadImage.PixelFormat);
 
-            for (int i = 0; i < loadImage.Width; i++)
+            int[,] redChannel = new int[loadImage.Width, loadImage.Height];
+            int[,] greenChannel = new int[loadImage.Width, loadImage.Height];
+            int[,] blueChannel = new int[loadImage.Width, loadImage.Height];
+
+            for (int x = 0; x < loadImage.Width; x++)
             {
-                for (int j = 0; j < loadImage.Height; j++)
+                for (int y = 0; y < loadImage.Height; y++)
                 {
-                    Color pixColor = loadImage.GetPixel(i, j);                                        
-                    
-                    Debug.WriteLine(pixColor.R + ", " + pixColor.G + ", " + pixColor.B);
-                    redChannel[i, j] = pixColor.R;
-                    greenChannel[i, j] = pixColor.G;
-                    blueChannel[i, j] = pixColor.B;
+                    Color pixColor = loadImage.GetPixel(x, y);                                        
+                                        
+                    redChannel[x, y] = pixColor.R;
+                    greenChannel[x, y] = pixColor.G;
+                    blueChannel[x, y] = pixColor.B;
+                }
+            }
+
+            List<int[,]> imageData = new List<int[,]>(3);
+            imageData.Add(redChannel);
+            imageData.Add(greenChannel);
+            imageData.Add(blueChannel);
+                 
+            return imageData;
+        }      
+
+        public static void imageSave(List<int[,]> imageData)
+        {
+            //full
+            int width = imageData[0].GetLength(0);
+            int height = imageData[0].GetLength(1);
+            Bitmap output = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            Bitmap greenOutput = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    int red = imageData[0][x, y];
+                    int green = imageData[1][x, y];
+                    int blue = imageData[2][x, y];
+
+                    output.SetPixel(x, y, Color.FromArgb(0, red, green, blue));
+                    greenOutput.SetPixel(x, y, Color.FromArgb(0, 0, green, 0));                    
                 }
             }
             
-            byte[] fileBytes = File.ReadAllBytes(imageFilePath); 
-            Debug.WriteLine(fileBytes.Length);
+            output.Save("C:\\Users\\Betsy\\Pictures\\outCat.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
+            greenOutput.Save("C:\\Users\\Betsy\\Pictures\\greenCat.bmp", System.Drawing.Imaging.ImageFormat.Bmp);
         }
-
-
 
         public static Dictionary<string, int> freqDict(float[,] inputData)
         {
