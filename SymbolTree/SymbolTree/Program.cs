@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
 using System.IO;
@@ -29,70 +30,20 @@ namespace SymbolTree
     public class Program
     {
         static void Main(string[] args)
-        {
-            // Build the starter dictionary of values and frequencies. This is dummy input for now.
-            //Dictionary<int, int> valFreq = new Dictionary<int, int>();
-
-            //valFreq.Add(35, 12);
-            //valFreq.Add(45, 14);
-            //valFreq.Add(42, 1);
-            //valFreq.Add(15, 12);
-            //valFreq.Add(12, 9);
-            //valFreq.Add(13, 6);
-            //valFreq.Add(3, 4);
-            //valFreq.Add(200, 12);
-            //valFreq.Add(122, 3);
-            //valFreq.Add(86, 20);
-            //valFreq.Add(41, 12);
-            
+        {            
+            //import image file. Get the pixel data in channels.
             string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
             List<int[,]> imageChannels = imageData(imageFile);
+            
+            //use imageSave to test atatus 
+            //imageSave(imageChannels);
 
-            imageSave(imageChannels);
             Dictionary<int, int> redFreqCollapse = freqDict(imageChannels[0]);
+
             foreach (KeyValuePair<int, int> kvp in redFreqCollapse)
             {
                 Debug.WriteLine("Pixel value:" + kvp.Key + ", frequency:" + kvp.Value);
             }
-
-            // Order value/freq pairs and use to build tree
-            //List<treeNode> nodes1 = listBuild(valFreq);
-
-            ////right now, nodes get removed from nodes1 when the tree is built
-            //List<treeNode> testNodes = new List<treeNode>();
-            //foreach(treeNode node in nodes1)
-            //{
-            //    testNodes.Add(node);
-            //}
-            //List<treeNode> treeList = new List<treeNode>();
-            //treeNode root = new treeNode(-1, -1, -1, -1, -1, null);
-            //Dictionary<int, treeNode> TreeDict = treeBuild(nodes1, out root);
-
-            //Dictionary<int, string> SymbolDict = SymbolBuild(TreeDict, root);
-
-            //foreach (KeyValuePair<int, string> symbol in SymbolDict)
-            //{
-            //    //origVal is the 0-255 value. matchRed is the frequency of that 0-255 value. 
-            //    int origVal = TreeDict[symbol.Key].value;
-            //    //for non-leaf nodes, this is just the sum of child frequencies. Original value is in nodes lists 
-            //    int origFreq = TreeDict[symbol.Key].freq; 
-                 
-            //    //testNodes
-            //    foreach (treeNode matchNode in treeList)
-            //    {
-            //        if (matchNode.id == symbol.Key)
-            //        {
-
-            //        }
-            //        else 
-            //        { 
-                    
-            //        }
-            //    }
-
-            //    Debug.WriteLine("Key: " + symbol.Key + " Symbol: \"" + symbol.Value + "\" Freq: " + origFreq + " Value: " + origVal);
-
-            //}
 
             List<treeNode> nodes1 = listBuild(redFreqCollapse);
             List<treeNode> treeList = new List<treeNode>();
@@ -109,6 +60,13 @@ namespace SymbolTree
                 Debug.WriteLine("Key: " + symbol.Key + " Symbol: \"" + symbol.Value + "\" Freq: " + origFreq + " Value: " + origVal);
 
             }
+            
+            float[,] basisMatrix = dctBasis();
+            float[,] basisTrans(basisMatrix);
+
+
+
+            //blockSplit(imageChannels);
         }
 
         public static List<int[,]> imageData(string imagePath)
@@ -391,46 +349,127 @@ namespace SymbolTree
             return pos;
         }
 
-        static Dictionary<string, int> buildDic()
+        public static void blockSplit(List<int[,]> imageChannels)
         {
-            //Dummy function
-            //using a string here
-            Dictionary<string, int> valFreq = new Dictionary<string, int>();
+            //fill in dummy pixels at edge. Make sure to transmit original pixel size to reverse this later
+            int width = imageChannels[0].GetLength(0);
+            int height = imageChannels[0].GetLength(1);
 
-            valFreq.Add("D", 12);
-            valFreq.Add("B", 14);
-            valFreq.Add("K", 1);
-            valFreq.Add("C", 12);
-            valFreq.Add("G", 9);
-            valFreq.Add("H", 6);
-            valFreq.Add("I", 4);
-            valFreq.Add("F", 12);
-            valFreq.Add("J", 3);
-            valFreq.Add("A", 20);
-            valFreq.Add("E", 12);
+            int widthMod = width % 8;
+            int heightMod = height % 8;
+            
+            int[,] divisibleRect = imageChannels[0];
 
-            return valFreq;
+            int xLoc = width - widthMod;
+            int yLoc = height - heightMod;
+
+            for (int x = xLoc; x < width; x++)
+            {
+                for (int y = yLoc; y < height; yLoc++)
+                {
+
+                }
+            }
+            //get number of blocks each way
+            int squaresWide = divisibleRect.GetLength(0) / 8;
+            int squaresHigh = divisibleRect.GetLength(1) / 8;
         }
 
-        static Dictionary<string, int> buildDic2()
+        public static float[,] dctBasis()
         {
-            // Same values and freqs as version 1
-            // Inserted in different order to make sure results are same
-            Dictionary<string, int> valFreq2 = new Dictionary<string, int>();
+            float[,] cellBasis = new float[8, 8];
+            
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    if (i == 0)
+                    {
+                        float basis = 1.0F / ((float)Math.Sqrt(8.0F));
+                        cellBasis[i, j] = basis;
+                    }
+                    else
+                    {
+                        float basis = (float)(Math.Sqrt(2.0F / 8.0F) * Math.Cos(((2.0F * j + 1.0F) * i * Math.PI) / 16.0F));
+                        cellBasis[i, j] = basis;
+                    }                  
+                }                
+            }
+            return cellBasis;
+        }
 
-            valFreq2.Add("D", 12);
-            valFreq2.Add("B", 14);
-            valFreq2.Add("K", 1);
-            valFreq2.Add("C", 12);
-            valFreq2.Add("G", 9);
-            valFreq2.Add("H", 6);
-            valFreq2.Add("I", 4);
-            valFreq2.Add("F", 12);
-            valFreq2.Add("J", 3);
-            valFreq2.Add("A", 20);
-            valFreq2.Add("E", 12);
+        public static float[,] transposeMatrix(float[,] inputMatrix)
+        {
+            float[,] transMatrix = new float[8, 8];
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    transMatrix[j, i] = inputMatrix[i, j];
+                }
+            }
 
-            return valFreq2;
-        }       
+            return transMatrix;
+        }
+        
+        public static int[,] encodedImage(List<int[,]> rawImage, Dictionary<int, string> symbolTree)
+        {
+            int[,] pixelEncoding = null;
+
+            
+            foreach (int[,] pixel in rawImage)
+            {
+                
+            }            
+            
+            return pixelEncoding;
+        }
+
+        public static void symbolDecode(Dictionary<int, int> symbolTee)
+        {
+            
+        }
+
+        //static Dictionary<string, int> buildDic()
+        //{
+        //    //Dummy function
+        //    //using a string here
+        //    Dictionary<string, int> valFreq = new Dictionary<string, int>();
+
+        //    valFreq.Add("D", 12);
+        //    valFreq.Add("B", 14);
+        //    valFreq.Add("K", 1);
+        //    valFreq.Add("C", 12);
+        //    valFreq.Add("G", 9);
+        //    valFreq.Add("H", 6);
+        //    valFreq.Add("I", 4);
+        //    valFreq.Add("F", 12);
+        //    valFreq.Add("J", 3);
+        //    valFreq.Add("A", 20);
+        //    valFreq.Add("E", 12);
+
+        //    return valFreq;
+        //}
+
+        //static Dictionary<string, int> buildDic2()
+        //{
+        //    // Same values and freqs as version 1
+        //    // Inserted in different order to make sure results are same
+        //    Dictionary<string, int> valFreq2 = new Dictionary<string, int>();
+
+        //    valFreq2.Add("D", 12);
+        //    valFreq2.Add("B", 14);
+        //    valFreq2.Add("K", 1);
+        //    valFreq2.Add("C", 12);
+        //    valFreq2.Add("G", 9);
+        //    valFreq2.Add("H", 6);
+        //    valFreq2.Add("I", 4);
+        //    valFreq2.Add("F", 12);
+        //    valFreq2.Add("J", 3);
+        //    valFreq2.Add("A", 20);
+        //    valFreq2.Add("E", 12);
+
+        //    return valFreq2;
+        //}       
     }
 }
