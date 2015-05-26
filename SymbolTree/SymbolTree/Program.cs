@@ -34,10 +34,27 @@ namespace SymbolTree
             //import image file. Get the pixel data in channels.
             string imageFile = "C:\\Users\\Betsy\\Pictures\\testCat.jpg";
             List<int[,]> imageChannels = imageData(imageFile);
-            
+            List<float[,]> dctChannels = new List<float[,]>();
+
             //use imageSave to test atatus 
             //imageSave(imageChannels);
 
+            //split data into blocks
+            List<int[,]> imageBlocks = blockSplit(imageChannels);
+
+            //generate transform matrices
+            float[,] basisMatrix = dctBasis();
+            float[,] basisTrans(basisMatrix);
+
+            //perform DCT
+            //level off inputs by subtracting 128 from each value
+
+
+            //quantize
+
+            //reduce with run-length encoding if possible 
+
+            //build value frequencies and assign Huffman symbols
             Dictionary<int, int> redFreqCollapse = freqDict(imageChannels[0]);
 
             foreach (KeyValuePair<int, int> kvp in redFreqCollapse)
@@ -59,14 +76,7 @@ namespace SymbolTree
 
                 Debug.WriteLine("Key: " + symbol.Key + " Symbol: \"" + symbol.Value + "\" Freq: " + origFreq + " Value: " + origVal);
 
-            }
-            
-            float[,] basisMatrix = dctBasis();
-            float[,] basisTrans(basisMatrix);
-
-
-
-            //blockSplit(imageChannels);
+            }            
         }
 
         public static List<int[,]> imageData(string imagePath)
@@ -349,30 +359,48 @@ namespace SymbolTree
             return pos;
         }
 
-        public static void blockSplit(List<int[,]> imageChannels)
+        public static List<int[,]> blockSplit(List<int[,]> imageChannels)
         {
+            List<int[,]> imageBlocks = new List<int[,]>();
+
             //fill in dummy pixels at edge. Make sure to transmit original pixel size to reverse this later
             int width = imageChannels[0].GetLength(0);
             int height = imageChannels[0].GetLength(1);
 
+            //get number of blocks each way
+            int blocksHigh = (int)(Math.Ceiling(height / 8.0F));
+            int blocksWide = (int)(Math.Ceiling(width / 8.0F));
+
             int widthMod = width % 8;
             int heightMod = height % 8;
-            
-            int[,] divisibleRect = imageChannels[0];
-
+                      
             int xLoc = width - widthMod;
             int yLoc = height - heightMod;
 
-            for (int x = xLoc; x < width; x++)
-            {
-                for (int y = yLoc; y < height; yLoc++)
-                {
+            int[,] divisibleRect = new int[blocksWide * 8, blocksHigh * 8];
+                       
+                //imageChannels[0];
 
+            for (int x = 0; x < width + widthMod; x++)
+            {
+                for (int y = 0; y < height + heightMod; y++)
+                {
+                    if (x < xLoc)
+                    {
+                        //just clone the existing x
+                    
+                    }
+                    else
+                    {
+                        //copy over dummy fill
+
+                    }
                 }
             }
-            //get number of blocks each way
-            int squaresWide = divisibleRect.GetLength(0) / 8;
-            int squaresHigh = divisibleRect.GetLength(1) / 8;
+            
+            //blocks are added left to right and top to bottom 
+
+            return imageBlocks;
         }
 
         public static float[,] dctBasis()
