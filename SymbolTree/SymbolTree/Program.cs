@@ -40,11 +40,11 @@ namespace SymbolTree
             //imageSave(imageChannels);
 
             //split data into blocks
-            List<int[,]> imageBlocks = blockSplit(imageChannels);
-
+            int[,] imageBlocks = blockSplit(imageChannels[0]);
+            
             //generate transform matrices
             float[,] basisMatrix = dctBasis();
-            float[,] basisTrans(basisMatrix);
+            float[,] basisTrans = transposeMatrix(basisMatrix);
 
             //perform DCT
             //level off inputs by subtracting 128 from each value
@@ -59,7 +59,7 @@ namespace SymbolTree
 
             foreach (KeyValuePair<int, int> kvp in redFreqCollapse)
             {
-                Debug.WriteLine("Pixel value:" + kvp.Key + ", frequency:" + kvp.Value);
+                //Debug.WriteLine("Pixel value:" + kvp.Key + ", frequency:" + kvp.Value);
             }
 
             List<treeNode> nodes1 = listBuild(redFreqCollapse);
@@ -74,7 +74,7 @@ namespace SymbolTree
                 int origVal = TreeDict[symbol.Key].value;
                 int origFreq = TreeDict[symbol.Key].freq;
 
-                Debug.WriteLine("Key: " + symbol.Key + " Symbol: \"" + symbol.Value + "\" Freq: " + origFreq + " Value: " + origVal);
+                //Debug.WriteLine("Key: " + symbol.Key + " Symbol: \"" + symbol.Value + "\" Freq: " + origFreq + " Value: " + origVal);
 
             }            
         }
@@ -83,7 +83,7 @@ namespace SymbolTree
         {
             Bitmap loadImage = new Bitmap(imagePath);
 
-            Debug.WriteLine(loadImage.PixelFormat);
+            //Debug.WriteLine(loadImage.PixelFormat);
 
             int[,] redChannel = new int[loadImage.Width, loadImage.Height];
             int[,] greenChannel = new int[loadImage.Width, loadImage.Height];
@@ -359,48 +359,118 @@ namespace SymbolTree
             return pos;
         }
 
-        public static List<int[,]> blockSplit(List<int[,]> imageChannels)
-        {
-            List<int[,]> imageBlocks = new List<int[,]>();
-
+        public static int[,] blockSplit(int[,] imagePixels)
+        {            
             //fill in dummy pixels at edge. Make sure to transmit original pixel size to reverse this later
-            int width = imageChannels[0].GetLength(0);
-            int height = imageChannels[0].GetLength(1);
+            int width = imagePixels.GetLength(0);
+            int height = imagePixels.GetLength(1);
 
             //get number of blocks each way
             int blocksHigh = (int)(Math.Ceiling(height / 8.0F));
             int blocksWide = (int)(Math.Ceiling(width / 8.0F));
 
-            int widthMod = width % 8;
-            int heightMod = height % 8;
-                      
-            int xLoc = width - widthMod;
-            int yLoc = height - heightMod;
-
+            int widthMod = 8 - (width % 8);
+            int heightMod = 8 - (height % 8);
+                                 
             int[,] divisibleRect = new int[blocksWide * 8, blocksHigh * 8];
                        
-                //imageChannels[0];
+                //imageChannels[0];            
 
             for (int x = 0; x < width + widthMod; x++)
-            {
+            {           
                 for (int y = 0; y < height + heightMod; y++)
                 {
-                    if (x < xLoc)
+                    if (x < width && y < height)
                     {
                         //just clone the existing x
-                    
+                        divisibleRect[x, y] = imagePixels[x, y];
                     }
-                    else
+                    else if (x >= width)
                     {
-                        //copy over dummy fill
-
+                        if (y < height)
+                        {
+                            //copy over dummy fill
+                            divisibleRect[x, y] = imagePixels[x - widthMod, y];                                                        
+                        }
+                        else
+                        {
+                            //blend
+                            divisibleRect[x, y] = imagePixels[x - widthMod, y - heightMod];                            
+                        }
+                    }
+                    else 
+                    {
+                        divisibleRect[x, y] = imagePixels[x, y - heightMod];
                     }
                 }
             }
+
+            //Debug.WriteLine("Input pixels");
+
+            //for (int x = 0; x < width; x++)
+            //{
+            //    for (int y = 0; y < height; y++)
+            //    {
+            //        Debug.Write(imagePixels[x, y] + ",");
+            //    }
+            //    Debug.Write("\n");
+            //}
+
+            //Debug.WriteLine("\nOutput pixels");
+
+            //for (int x = 0; x < divisibleRect.GetLength(0); x++)
+            //{
+            //    for (int y = 0; y < divisibleRect.GetLength(1); y++)
+            //    {
+            //        Debug.Write(divisibleRect[x, y] + ",");
+            //    }
+            //    Debug.Write("\n");
+            //}
             
             //blocks are added left to right and top to bottom 
+            List<int[,]> blocks = new List<int[,]>();
 
-            return imageBlocks;
+            int xPos = 0;
+            int yPos = 0;
+            int totalBlocks = blocksWide * blocksHigh;
+            
+            // add blocks like this:
+            // top corner
+            // [0, 0] [8, 0] [16, 0]
+            // [0, 8] [8, 8] [16, 8]
+            while (yPos <= blocksHigh)
+            {
+                int[,] newBlock = new int[8, 8];
+
+                while (xPos <= blocksWide)
+                {                    
+                    for (int xBit = 0; xBit < 8; xBit++)
+                    {
+                        for (int yBit = 0; yBit < 8; yBit++)
+                        {
+                            newBlock[xBit, yBit] = divisibleRect[xPos + xBit, yPos + yBit];                            
+                        }
+                    }
+
+                    xPos += 8;
+                }
+                blocks.Add(newBlock);
+                                
+                for (int x = 0; x < 8; x++)
+                {
+                    for (int y = 0; y < 8; y++)
+                    {
+                        Debug.Write(newBlock[x, y] + ", ");
+                    }
+                    Debug.Write("\n");
+                }
+
+                yPos += 8;
+            }
+
+            
+
+            return divisibleRect;
         }
 
         public static float[,] dctBasis()
