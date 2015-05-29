@@ -373,8 +373,17 @@ namespace SymbolTree
             int heightMod = 8 - (height % 8);
                                  
             int[,] divisibleRect = new int[blocksWide * 8, blocksHigh * 8];
-                       
-                //imageChannels[0];            
+                                      
+            // so bad. why did you do it this way?
+            // how about:
+            // start with a copy the whole thing filling the top left
+            // figure out what remains:
+            // rectangle 1 is the extra rows below
+            // rectange 2 is the extra columns to the right
+            // rectangle 3 is the intersection
+            // for 1 and 2, pull off the matching array and reflect it: top/bottom for 1, LR for 2
+            // for 3, maybe:
+            // average the bottom 3.height and the right 3.width pixels from 1 and 2?
 
             for (int x = 0; x < width + widthMod; x++)
             {           
@@ -400,6 +409,7 @@ namespace SymbolTree
                     }
                     else 
                     {
+                        // This is a basic copy. Would be better to flip to avoid ringing at border
                         divisibleRect[x, y] = imagePixels[x, y - heightMod];
                     }
                 }
@@ -438,12 +448,15 @@ namespace SymbolTree
             // top corner
             // [0, 0] [8, 0] [16, 0]
             // [0, 8] [8, 8] [16, 8]
-            while (yPos <= blocksHigh)
-            {
-                int[,] newBlock = new int[8, 8];
 
-                while (xPos <= blocksWide)
-                {                    
+            // iterate through x in inner loop
+            Debug.WriteLine("Expected blocks: " + blocksHigh * blocksWide);
+            while (yPos <= height)
+            {                
+                while (xPos <= width)
+                {
+                    int[,] newBlock = new int[8, 8]; 
+                    Debug.WriteLine("xPos = " + xPos + ", yPos = " + yPos);
                     for (int xBit = 0; xBit < 8; xBit++)
                     {
                         for (int yBit = 0; yBit < 8; yBit++)
@@ -451,25 +464,23 @@ namespace SymbolTree
                             newBlock[xBit, yBit] = divisibleRect[xPos + xBit, yPos + yBit];                            
                         }
                     }
-
+                    blocks.Add(newBlock);
                     xPos += 8;
-                }
-                blocks.Add(newBlock);
-                                
-                for (int x = 0; x < 8; x++)
-                {
-                    for (int y = 0; y < 8; y++)
+    
+                    for (int x = 0; x < 8; x++)
                     {
-                        Debug.Write(newBlock[x, y] + ", ");
-                    }
+                        for (int y = 0; y < 8; y++)
+                        {
+                            Debug.Write(newBlock[x, y] + ", ");
+                        }
                     Debug.Write("\n");
+                    }
+                    Debug.WriteLine("Next block");
                 }
-
+                                               
                 yPos += 8;
-            }
-
-            
-
+                xPos = 0;
+            }            
             return divisibleRect;
         }
 
