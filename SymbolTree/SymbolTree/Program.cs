@@ -40,7 +40,8 @@ namespace SymbolTree
             //imageSave(imageChannels);
 
             //split data into blocks
-            int[,] imageBlocks = blockSplit(imageChannels[0]);
+            int[,] paddedRect = edgePad(imageChannels[0]);
+            List<int[,]> imageBlocks = blockSplit(paddedRect);
             
             //generate transform matrices
             float[,] basisMatrix = dctBasis();
@@ -359,8 +360,8 @@ namespace SymbolTree
             return pos;
         }
 
-        public static int[,] blockSplit(int[,] imagePixels)
-        {            
+        public static int[,] edgePad(int[,] imagePixels)
+        {
             //fill in dummy pixels at edge. Make sure to transmit original pixel size to reverse this later
             int width = imagePixels.GetLength(0);
             int height = imagePixels.GetLength(1);
@@ -371,9 +372,9 @@ namespace SymbolTree
 
             int widthMod = 8 - (width % 8);
             int heightMod = 8 - (height % 8);
-                                 
-            int[,] divisibleRect = new int[blocksWide * 8, blocksHigh * 8];
-                                      
+
+            int[,] paddedPixels = new int[blocksWide * 8, blocksHigh * 8];
+
             // so bad. why did you do it this way?
             // how about:
             // start with a copy the whole thing filling the top left
@@ -386,62 +387,52 @@ namespace SymbolTree
             // average the bottom 3.height and the right 3.width pixels from 1 and 2?
 
             for (int x = 0; x < width + widthMod; x++)
-            {           
+            {
                 for (int y = 0; y < height + heightMod; y++)
                 {
                     if (x < width && y < height)
                     {
                         //just clone the existing x
-                        divisibleRect[x, y] = imagePixels[x, y];
+                        paddedPixels[x, y] = paddedPixels[x, y];
                     }
                     else if (x >= width)
                     {
                         if (y < height)
                         {
                             //copy over dummy fill
-                            divisibleRect[x, y] = imagePixels[x - widthMod, y];                                                        
+                            paddedPixels[x, y] = paddedPixels[x - widthMod, y];
                         }
                         else
                         {
                             //blend
-                            divisibleRect[x, y] = imagePixels[x - widthMod, y - heightMod];                            
+                            paddedPixels[x, y] = paddedPixels[x - widthMod, y - heightMod];
                         }
                     }
-                    else 
+                    else
                     {
                         // This is a basic copy. Would be better to flip to avoid ringing at border
-                        divisibleRect[x, y] = imagePixels[x, y - heightMod];
+                        paddedPixels[x, y] = paddedPixels[x, y - heightMod];
                     }
                 }
             }
-
-            //Debug.WriteLine("Input pixels");
-
-            //for (int x = 0; x < width; x++)
-            //{
-            //    for (int y = 0; y < height; y++)
-            //    {
-            //        Debug.Write(imagePixels[x, y] + ",");
-            //    }
-            //    Debug.Write("\n");
-            //}
-
-            //Debug.WriteLine("\nOutput pixels");
-
-            //for (int x = 0; x < divisibleRect.GetLength(0); x++)
-            //{
-            //    for (int y = 0; y < divisibleRect.GetLength(1); y++)
-            //    {
-            //        Debug.Write(divisibleRect[x, y] + ",");
-            //    }
-            //    Debug.Write("\n");
-            //}
             
+            return paddedPixels;
+        }
+
+        public static List<int[,]> blockSplit(int[,] paddedPixels)
+        {                          
             //blocks are added left to right and top to bottom 
             List<int[,]> blocks = new List<int[,]>();
+            
+            int width = paddedPixels.GetLength(0);
+            int height = paddedPixels.GetLength(1);
 
+            //get number of blocks each way
+            int blocksHigh = (int)(Math.Ceiling(height / 8.0F));
+            int blocksWide = (int)(Math.Ceiling(width / 8.0F));
             int xPos = 0;
             int yPos = 0;
+
             int totalBlocks = blocksWide * blocksHigh;
             
             // add blocks like this:
@@ -461,7 +452,7 @@ namespace SymbolTree
                     {
                         for (int yBit = 0; yBit < 8; yBit++)
                         {
-                            newBlock[xBit, yBit] = divisibleRect[xPos + xBit, yPos + yBit];                            
+                            newBlock[xBit, yBit] = paddedPixels[xPos + xBit, yPos + yBit];                            
                         }
                     }
                     blocks.Add(newBlock);
@@ -481,7 +472,7 @@ namespace SymbolTree
                 yPos += 8;
                 xPos = 0;
             }            
-            return divisibleRect;
+            return blocks;
         }
 
         public static float[,] dctBasis()

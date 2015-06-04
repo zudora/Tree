@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Text;
 using SymbolTree;
+using System.Diagnostics;
 
 namespace TreeAssignTest
 {
@@ -41,24 +42,24 @@ namespace TreeAssignTest
 
             Assert.IsFalse(prefixMatch, "Prefix found");
 
-            //testBadPrefixes();
+            testBadPrefixes();
         }
 
-        //public void testBadPrefixes()
-        //{
-        //    //making sure prefixes are caught
-        //    Dictionary<int, string> testValues = new Dictionary<int, string>();
+        public void testBadPrefixes()
+        {
+            //making sure prefixes are caught by test code. This is intended to fail!
+            Dictionary<int, string> testValues = new Dictionary<int, string>();
 
-        //    testValues.Add(0, "0000");
-        //    testValues.Add(1, "00");
-        //    testValues.Add(2, "0010");
-        //    testValues.Add(3, "0100");
+            testValues.Add(0, "0000");
+            testValues.Add(1, "00");
+            testValues.Add(2, "0010");
+            testValues.Add(3, "0100");
 
-        //    bool prefixMatch = prefixMatchTest(testValues);
+            bool prefixMatch = prefixMatchTest(testValues);
 
-        //    Assert.IsFalse(prefixMatch, "Prefix found");
+            Assert.IsTrue(prefixMatch, "Prefix not found");
 
-        //}
+        }
 
         public static bool prefixMatchTest (Dictionary<int, string> testSymbols)
         {
@@ -79,6 +80,48 @@ namespace TreeAssignTest
                 }
             }
             return prefixMatch;
-        }    
+        }
+    
+        public void blockTest()
+        {
+            int[,] testRect = new int[27,30];
+
+            for (int x = 0; x < testRect.GetLength(0); x++)
+            {
+                for (int y = 0; y < testRect.GetLength(1); y++)
+                {
+                    string coordStr = (x.ToString() + y.ToString());
+                    int coordInt = Convert.ToInt16(coordStr);
+                    testRect[x, y] = coordInt;
+                }
+            }
+            
+            int[,] paddedRect = Program.edgePad(testRect);
+
+            List<int[,]> imageBlocks = Program.blockSplit(paddedRect);
+
+            double initBlocksWide = paddedRect.GetLength(0) / 8;
+            double initBlocksHigh = paddedRect.GetLength(1) / 8;
+
+            int intBlocksWide = (int)Math.Floor(initBlocksWide);
+            int intBlocksHigh = (int)Math.Floor(initBlocksHigh);
+
+            int widthMod = (paddedRect.GetLength(0) % 8);
+            int heightMod = (paddedRect.GetLength(1) % 8);
+
+            int paddedBlocksWide = paddedRect.GetLength(0) / 8;
+            int paddedBlocksHigh = paddedRect.GetLength(1) / 8;
+
+            for (int outx = 0; outx < testRect.GetLength(0); outx++)
+            {
+                for (int outy = 0; outy < testRect.GetLength(1); outy++)
+                {                    
+                    Debug.Write(testRect[outx, outy] + ", ");                    
+                }
+                Debug.Write("\n");
+            }
+            
+            
+        }
     }
 }
