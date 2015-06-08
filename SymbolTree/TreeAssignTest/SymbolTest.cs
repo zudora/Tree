@@ -43,6 +43,7 @@ namespace TreeAssignTest
             Assert.IsFalse(prefixMatch, "Prefix found");
 
             testBadPrefixes();
+            blockTest();
         }
 
         public void testBadPrefixes()
@@ -85,7 +86,6 @@ namespace TreeAssignTest
         public void blockTest()
         {
             int[,] testRect = new int[27,30];
-
             for (int x = 0; x < testRect.GetLength(0); x++)
             {
                 for (int y = 0; y < testRect.GetLength(1); y++)
@@ -95,10 +95,12 @@ namespace TreeAssignTest
                     testRect[x, y] = coordInt;
                 }
             }
-            
+            Assert.IsTrue(testRect[0,0] == 0);
+            Assert.IsTrue(testRect[26, 29] == 2629);
+
             int[,] paddedRect = Program.edgePad(testRect);
 
-            List<int[,]> imageBlocks = Program.blockSplit(paddedRect);
+            Assert.IsTrue(paddedRect.GetLength(0) == );
 
             double initBlocksWide = paddedRect.GetLength(0) / 8;
             double initBlocksHigh = paddedRect.GetLength(1) / 8;
@@ -111,7 +113,7 @@ namespace TreeAssignTest
 
             int paddedBlocksWide = paddedRect.GetLength(0) / 8;
             int paddedBlocksHigh = paddedRect.GetLength(1) / 8;
-
+             
             for (int outx = 0; outx < testRect.GetLength(0); outx++)
             {
                 for (int outy = 0; outy < testRect.GetLength(1); outy++)
@@ -121,7 +123,7 @@ namespace TreeAssignTest
                 Debug.Write("\n");
             }
             
-            
+            List<int[,]> imageBlocks = Program.blockSplit(paddedRect);
         }
     }
 }

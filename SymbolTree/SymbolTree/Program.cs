@@ -393,25 +393,25 @@ namespace SymbolTree
                     if (x < width && y < height)
                     {
                         //just clone the existing x
-                        paddedPixels[x, y] = paddedPixels[x, y];
+                        paddedPixels[x, y] = imagePixels[x, y];
                     }
                     else if (x >= width)
                     {
                         if (y < height)
                         {
                             //copy over dummy fill
-                            paddedPixels[x, y] = paddedPixels[x - widthMod, y];
+                            paddedPixels[x, y] = imagePixels[x - widthMod, y];
                         }
                         else
                         {
                             //blend
-                            paddedPixels[x, y] = paddedPixels[x - widthMod, y - heightMod];
+                            paddedPixels[x, y] = imagePixels[x - widthMod, y - heightMod];
                         }
                     }
                     else
                     {
                         // This is a basic copy. Would be better to flip to avoid ringing at border
-                        paddedPixels[x, y] = paddedPixels[x, y - heightMod];
+                        paddedPixels[x, y] = imagePixels[x, y - heightMod];
                     }
                 }
             }
@@ -442,19 +442,22 @@ namespace SymbolTree
 
             // iterate through x in inner loop
             Debug.WriteLine("Expected blocks: " + blocksHigh * blocksWide);
-            while (yPos <= height)
-            {                
-                while (xPos <= width)
+            
+            while (yPos < height)
+            {
+                
+                while (xPos < width)
                 {
                     int[,] newBlock = new int[8, 8]; 
                     Debug.WriteLine("xPos = " + xPos + ", yPos = " + yPos);
-                    for (int xBit = 0; xBit < 8; xBit++)
+                    for (int yBit = 0; yBit < 8; yBit++)
                     {
-                        for (int yBit = 0; yBit < 8; yBit++)
+                        for (int xBit = 0; xBit < 8; xBit++)
                         {
                             newBlock[xBit, yBit] = paddedPixels[xPos + xBit, yPos + yBit];                            
                         }
                     }
+
                     blocks.Add(newBlock);
                     xPos += 8;
     
@@ -468,6 +471,7 @@ namespace SymbolTree
                     }
                     Debug.WriteLine("Next block");
                 }
+                
                                                
                 yPos += 8;
                 xPos = 0;
