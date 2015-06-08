@@ -39,8 +39,11 @@ namespace SymbolTree
             //use imageSave to test atatus 
             //imageSave(imageChannels);
 
+            //level off inputs by subtracting 128 from each value
+            List<int[,]> rerangedChannels = levelOff(imageChannels);
+            
             //split data into blocks
-            int[,] paddedRect = edgePad(imageChannels[0]);
+            int[,] paddedRect = edgePad(rerangedChannels[0]);
             List<int[,]> imageBlocks = blockSplit(paddedRect);
             
             //generate transform matrices
@@ -48,8 +51,7 @@ namespace SymbolTree
             float[,] basisTrans = transposeMatrix(basisMatrix);
 
             //perform DCT
-            //level off inputs by subtracting 128 from each value
-
+            
 
             //quantize
 
@@ -359,7 +361,27 @@ namespace SymbolTree
             }
             return pos;
         }
+    
+        public static List<int[,]> levelOff(List<int[,]> inputLevels)
+        {
+            List<int[,]> rerangedChannels = new List<int[,]>();
 
+            foreach (int[,] channel in inputLevels)
+                {
+                    int channelWidth = channel.GetLength(0);
+                    int channelHeight = channel.GetLength(1);
+                    int[,] shiftedData = new int[channelWidth, channelHeight];
+                    for (int x = 0; x < channelWidth; x++)
+                    {
+                        for (int y = 0; y < channelHeight; y++)
+                        {
+                            shiftedData[x, y] = channel[x, y] - 128;
+                        }
+                    }
+                    rerangedChannels.Add(shiftedData);
+                }
+            return rerangedChannels;
+        }
         public static int[,] edgePad(int[,] imagePixels)
         {
             //fill in dummy pixels at edge. Make sure to transmit original pixel size to reverse this later
