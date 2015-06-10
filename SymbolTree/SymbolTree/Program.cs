@@ -463,7 +463,7 @@ namespace SymbolTree
             // [0, 8] [8, 8] [16, 8]
 
             // iterate through x in inner loop
-            Debug.WriteLine("Expected blocks: " + blocksHigh * blocksWide);
+            //Debug.WriteLine("Expected blocks: " + blocksHigh * blocksWide);
             
             while (yPos < height)
             {
@@ -471,7 +471,7 @@ namespace SymbolTree
                 while (xPos < width)
                 {
                     int[,] newBlock = new int[8, 8]; 
-                    Debug.WriteLine("xPos = " + xPos + ", yPos = " + yPos);
+                    //Debug.WriteLine("xPos = " + xPos + ", yPos = " + yPos);
                     for (int yBit = 0; yBit < 8; yBit++)
                     {
                         for (int xBit = 0; xBit < 8; xBit++)
@@ -487,11 +487,11 @@ namespace SymbolTree
                     {
                         for (int y = 0; y < 8; y++)
                         {
-                            Debug.Write(newBlock[x, y] + ", ");
+                            //Debug.Write(newBlock[x, y] + ", ");
                         }
-                    Debug.Write("\n");
+                    //Debug.Write("\n");
                     }
-                    Debug.WriteLine("Next block");
+                    //Debug.WriteLine("Next block");
                 }
                 
                                                
@@ -536,6 +536,18 @@ namespace SymbolTree
             }
 
             return transMatrix;
+        }
+
+        public double[,] multMatrix(int[,] pixelMatrix, float[,] basisMatrix)
+        {
+            double[,] productMatrix = new double[8, 8];
+
+            for (int basisRow = 0; basisRow < basisMatrix.GetLength(1); basisRow++)
+            {
+
+            }
+
+            return productMatrix;
         }
         
         public static int[,] encodedImage(List<int[,]> rawImage, Dictionary<int, string> symbolTree)

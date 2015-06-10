@@ -44,8 +44,97 @@ namespace TreeAssignTest
 
             testBadPrefixes();
             blockTest();
+
+            //test matrix for levels and DCT
+            int[,] testMatrix = matFill();
+            List<int[,]> testMatList = new List<int[,]>();
+            testMatList.Add(testMatrix);
+            List<int[,]> leveledMatList = Program.levelOff(testMatList);
+            int[,] leveledMatrix = leveledMatList[0];
+
+            
         }
 
+        public static int[,] matFill()
+        {
+            int[,] testMatrix = new int[8, 8];
+
+            testMatrix[0, 0] =154;	
+            testMatrix[1, 0] =123;	
+            testMatrix[2, 0] =123;	
+            testMatrix[3, 0] =123;	
+            testMatrix[4, 0] =123;	
+            testMatrix[5, 0] =123;	
+            testMatrix[6, 0] =123;	
+            testMatrix[7, 0] =136;
+                     
+            testMatrix[0, 1] =192;	
+            testMatrix[1, 1] =180;	
+            testMatrix[2, 1] =136;	
+            testMatrix[3, 1] =154;	
+            testMatrix[4, 1] =154;	
+            testMatrix[5, 1] =154;	
+            testMatrix[6, 1] =136;	
+            testMatrix[7, 1] =110;
+                     
+            testMatrix[0, 2] =254;	
+            testMatrix[1, 2] =198;	
+            testMatrix[2, 2] =154;	
+            testMatrix[3, 2] =154;	
+            testMatrix[4, 2] =180;	
+            testMatrix[5, 2] =154;	
+            testMatrix[6, 2] =123;	
+            testMatrix[7, 2] =123;
+                     
+            testMatrix[0, 3] =239;	
+            testMatrix[1, 3] =180;	
+            testMatrix[2, 3] =136;	
+            testMatrix[3, 3] =180;	
+            testMatrix[4, 3] =180;	
+            testMatrix[5, 3] =166;	
+            testMatrix[6, 3] =123;	
+            testMatrix[7, 3] =123;
+                     
+            testMatrix[0, 4] =180;	
+            testMatrix[1, 4] =154;	
+            testMatrix[2, 4] =136;	
+            testMatrix[3, 4] =167;	
+            testMatrix[4, 4] =166;	
+            testMatrix[5, 4] =149;	
+            testMatrix[6, 4] =136;	
+            testMatrix[7, 4] =136;
+                     
+            testMatrix[0, 5] =128;	
+            testMatrix[1, 5] =136;	
+            testMatrix[2, 5] =123;	
+            testMatrix[3, 5] =136;	
+            testMatrix[4, 5] =154;	
+            testMatrix[5, 5] =180;	
+            testMatrix[6, 5] =198;	
+            testMatrix[7, 5] =154;
+                     
+            testMatrix[0, 6] =123;	
+            testMatrix[1, 6] =105;	
+            testMatrix[2, 6] =110;	
+            testMatrix[3, 6] =149;	
+            testMatrix[4, 6] =136;	
+            testMatrix[5, 6] =136;	
+            testMatrix[6, 6] =180;	
+            testMatrix[7, 6] =166;
+                     
+            testMatrix[0, 7] =110;	
+            testMatrix[1, 7] =136;	
+            testMatrix[2, 7] =123;	
+            testMatrix[3, 7] =123;	
+            testMatrix[4, 7] =123;	
+            testMatrix[5, 7] =136;	
+            testMatrix[6, 7] =154;
+            testMatrix[7, 7] = 136;
+            
+            return testMatrix;
+
+        }
+        
         public void testBadPrefixes()
         {
             //making sure prefixes are caught by test code. This is intended to fail!
